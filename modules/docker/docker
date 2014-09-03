@@ -1,0 +1,11 @@
+dockerclean() {
+	docker rm $(docker ps -a -q)
+	docker rmi $(docker images | awk '/<none>/ {print $3}')
+}
+dockerdev() {
+	docker run -t -i --entrypoint /bin/bash -v "$PWD:/docker" "$1" -i
+}
+
+proxysocket() {
+	sudo socat -t100 -v UNIX-LISTEN:/tmp/proxysocket.sock,mode=777,reuseaddr,fork UNIX-CONNECT:/var/run/docker.sock
+}
