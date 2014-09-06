@@ -9,3 +9,16 @@ dockerdev() {
 proxysocket() {
 	sudo socat -t100 -v UNIX-LISTEN:/tmp/proxysocket.sock,mode=777,reuseaddr,fork UNIX-CONNECT:/var/run/docker.sock
 }
+
+rundocker(){
+	docker inspect -f 'docker run --name {{.Name}}{{range $index, $port := .NetworkSettings.Ports}}
+{{range $port}}
+ -p {{.HostPort}}:{{$index}}
+{{end}}
+{{end}}
+ 
+{{.Config.Image}}
+{{range .Args}}
+ {{.}}
+{{end}}' "$1" | tr -d '\n'
+}
