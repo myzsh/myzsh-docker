@@ -1,3 +1,44 @@
+dockerrun() {
+	container="$1"
+	shift
+	docker inspect -f "docker run $@ --name {{.Name}}{{range \$index, \$port := .NetworkSettings.Ports}}
+{{range \$port}}
+ -p {{.HostPort}}:{{\$index}}
+{{end}}
+{{end}}
+{{range .HostConfig.VolumesFrom}}
+ --volumes-from {{.}}
+{{end}}
+{{range \$host, \$guest := .HostConfig.Binds}}
+ -v {{\$guest}}
+{{end}}
+ {{.Config.Image}}
+{{range .Args}}
+ {{.}}
+{{end}}" "$container" | tr -d '\n'
+}
+
+dockerlogs() {
+	container="$1"
+	shift
+	length=10
+	if [ -n "$1" ]; then
+		length="$1"
+		shift
+	fi
+set -x
+	docker logs -f "$container" 2>&1 \
+	| (
+		head -n $[ 	$(docker logs "$container" 2>&1 \
+				| wc -l) - $length ] >/dev/null
+	cat
+	)
+}
+
+dockerip() {
+	docker inspect -f '{{.NetworkSettings.IPAddress}}' "$1"
+}
+
 dockerclean() {
 	docker rm $(docker ps -a -q)
 	docker rmi $(docker images | awk '/<none>/ {print $3}')
@@ -6,19 +47,7 @@ dockerdev() {
 	docker run -t -i --entrypoint /bin/bash -v "$PWD:/docker" "$1" -i
 }
 
+
 proxysocket() {
 	sudo socat -t100 -v UNIX-LISTEN:/tmp/proxysocket.sock,mode=777,reuseaddr,fork UNIX-CONNECT:/var/run/docker.sock
-}
-
-rundocker(){
-	docker inspect -f 'docker run --name {{.Name}}{{range $index, $port := .NetworkSettings.Ports}}
-{{range $port}}
- -p {{.HostPort}}:{{$index}}
-{{end}}
-{{end}}
- 
-{{.Config.Image}}
-{{range .Args}}
- {{.}}
-{{end}}' "$1" | tr -d '\n'
 }
