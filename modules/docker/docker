@@ -9,13 +9,16 @@ dockerrun() {
 {{range .HostConfig.VolumesFrom}}
  --volumes-from {{.}}
 {{end}}
+{{range .Config.Env}}
+ -e {{.}}
+{{end}}
 {{range \$host, \$guest := .HostConfig.Binds}}
  -v {{\$guest}}
 {{end}}
  {{.Config.Image}}
 {{range .Args}}
  {{.}}
-{{end}}" "$container" | tr -d '\n'
+{{end}}" "$container" | tr -d '\n' | sed -r 's/ -e (HOME|PATH)=[^ ]*//g'
 }
 
 dockerlogs() {
