@@ -84,7 +84,7 @@ docker() {
 		shift
 		container="$1"
 		shift
-		docker inspect -f "docker run $@ --name {{.Name}}{{range \$index, \$port := .NetworkSettings.Ports}}
+		command docker inspect -f "docker run $@ --name {{.Name}}{{range \$index, \$port := .NetworkSettings.Ports}}
 {{range \$port}}
  -p {{.HostPort}}:{{\$index}}
 {{end}}
