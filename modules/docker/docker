@@ -1,7 +1,91 @@
-dockerrun() {
-	container="$1"
-	shift
-	docker inspect -f "docker run $@ --name {{.Name}}{{range \$index, \$port := .NetworkSettings.Ports}}
+#!/usr/bin/zsh
+docker() {
+	local verb="$1"
+	local mod="$2"
+
+	case "$verb" in
+	clean)
+		case "$mod" in
+		containers)
+			command docker rm $(command docker ps -a -q) 2>/dev/null
+		;;
+		env)
+			unset DOCKER_HOST
+			unset DOCKER_CERT_PATH
+			unset DOCKER_TLS_VERIFY
+		;;
+		images)
+			command docker rmi $(command docker images | awk '/<none>/ {print $3}') 2>/dev/null
+		;;
+		*)
+			$0 clean containers
+			$0 clean images
+		;;
+		esac
+	;;
+	dev)
+		if [ -z "$3" ]; then
+			command docker run -t -i -v "$PWD:/work" "$mod"
+		else
+			command docker run -t -i -v "$3:/work" "$mod"
+		fi
+	;;
+	help)
+		shift
+		if [ -z "$1" ]; then
+		command docker help 2>&1 | sed '/wait/a \
+\
+    myzsh provided commands:\
+    clean     Clean up images or containers, or both\
+    dev       Run /bin/bash in an image with $PWD mapped in\
+    init      Setup boot2docker\
+    tail      Show only the last few lines from the log of a container\
+    ip        Get the IP of a container\
+    describe  Describe how a container was started\
+    socket    Run a proxy socket on /tmp/proxysocket.sock' >&2
+		fi
+	;;
+	init)
+		if isosx; then
+			export $(boot2docker socket 2>&1 | sed 's/^\s*//')
+
+			if [ -z "$DOCKER_CERT_PATH" ]; then
+				export DOCKER_CERT_PATH="${HOME}/.boot2docker/certs/$(boot2docker info | grep Name | cut -d":" -f2 | cut -d"\"" -f2)"
+			fi
+
+			if [ -z "$DOCKER_TLS_VERIFY" ]; then
+				export DOCKER_TLS_VERIFY=1
+			fi
+		fi
+	;;
+	tail)
+		shift
+		container="$1"
+		shift
+		length=10
+		if [ -n "$1" ]; then
+			length="$1"
+			shift
+		fi
+		command docker logs -f "$container" 2>&1 \
+		| (
+			head -n $[ 	$(command docker logs "$container" 2>&1 \
+					| wc -l) - $length ] >/dev/null
+		cat
+		)
+	;;
+	ip)
+		shift
+		command docker inspect -f '{{.NetworkSettings.IPAddress}}' "$1"
+	;;
+	socket)
+		sudo socat -t100 -v UNIX-LISTEN:/tmp/proxysocket.sock,mode=777,reuseaddr,fork UNIX-CONNECT:/var/run/docker.sock
+	;;
+	describe)
+		shift
+		container="$1"
+		shift
+		command docker inspect -f "docker run $@ --name {{.Name}}{{range \$index, \$port := .NetworkSettings.Ports}}
 {{range \$port}}
  -p {{.HostPort}}:{{\$index}}
 {{end}}
@@ -19,38 +103,10 @@ dockerrun() {
 {{range .Args}}
  {{.}}
 {{end}}" "$container" | tr -d '\n' | sed -r 's/ -e (HOME|PATH)=[^ ]*//g'
+	;;
+	*)
+		command docker "$@"
+	;;
+	esac
 }
-
-dockerlogs() {
-	container="$1"
-	shift
-	length=10
-	if [ -n "$1" ]; then
-		length="$1"
-		shift
-	fi
-set -x
-	docker logs -f "$container" 2>&1 \
-	| (
-		head -n $[ 	$(docker logs "$container" 2>&1 \
-				| wc -l) - $length ] >/dev/null
-	cat
-	)
-}
-
-dockerip() {
-	docker inspect -f '{{.NetworkSettings.IPAddress}}' "$1"
-}
-
-dockerclean() {
-	docker rm $(docker ps -a -q)
-	docker rmi $(docker images | awk '/<none>/ {print $3}')
-}
-dockerdev() {
-	docker run -t -i --rm --entrypoint /bin/bash -v "$PWD:/docker" "$1" -i
-}
-
-
-proxysocket() {
-	sudo socat -t100 -v UNIX-LISTEN:/tmp/proxysocket.sock,mode=777,reuseaddr,fork UNIX-CONNECT:/var/run/docker.sock
-}
+# vim: filetype=zsh noexpandtab
