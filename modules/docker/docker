@@ -47,14 +47,14 @@ docker() {
 	;;
 	init)
 		if isosx; then
-			export $(boot2docker socket 2>&1 | sed 's/^\s*//')
+			$(boot2docker shellinit 2>/dev/null | grep HOST)
 
 			if [ -z "$DOCKER_CERT_PATH" ]; then
-				export DOCKER_CERT_PATH="${HOME}/.boot2docker/certs/$(boot2docker info | grep Name | cut -d":" -f2 | cut -d"\"" -f2)"
+				$(boot2docker shellinit 2>/dev/null | grep CERT_PATH)
 			fi
 
 			if [ -z "$DOCKER_TLS_VERIFY" ]; then
-				export DOCKER_TLS_VERIFY=1
+				$(boot2docker shellinit 2>/dev/null | grep TLS)
 			fi
 		fi
 	;;
