@@ -42,7 +42,8 @@ docker() {
     tail      Show only the last few lines from the log of a container\
     ip        Get the IP of a container\
     describe  Describe how a container was started\
-    socket    Run a proxy socket on /tmp/proxysocket.sock' >&2
+    socket    Run a proxy socket on /tmp/proxysocket.sock\
+    shove     Use save and load to push an image into another daemon over ssh' >&2
 		fi
 	;;
 	init)
@@ -103,6 +104,14 @@ docker() {
 {{range .Args}}
  {{.}}
 {{end}}" "$container" | tr -d '\n' | sed -r 's/ -e (HOME|PATH)=[^ ]*//g'
+	;;
+	shove)
+		shift
+		size=$(command docker save "$1" | wc -c)
+		echo "size: $size"
+		set -x
+		command docker save "$1" | bzip2 -9 | ssh "$2" 'bzcat | docker load'
+		set +x
 	;;
 	*)
 		command docker "$@"
