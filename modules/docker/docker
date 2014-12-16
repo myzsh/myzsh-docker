@@ -127,6 +127,15 @@ docker() {
 			docker init
 		fi
 	;;
+	upgrade)
+		if isosx; then
+			after=""
+			[ "$(boot2docker status 2>&1)" = "running" ] && after="up"
+			$0 down
+			boot2docker upgrade
+			boot2docker $after 2>/dev/null
+		fi
+	;;
 	*)
 		command docker "$@"
 	;;
