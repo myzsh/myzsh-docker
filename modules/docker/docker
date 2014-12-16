@@ -118,6 +118,12 @@ docker() {
 		command docker save "$1" | bzip2 -9 | ssh "$2" 'bzcat | docker load'
 		set +x
 	;;
+	up)
+		if isosx; then
+			boot2docker start
+			docker init
+		fi
+	;;
 	*)
 		command docker "$@"
 	;;
