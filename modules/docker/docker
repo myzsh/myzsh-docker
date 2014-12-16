@@ -28,6 +28,9 @@ docker() {
 		;;
 		esac
 	;;
+	down)
+		boot2docker down
+	;;
 	dev)
 		if [ -z "$3" ]; then
 			command docker run -t -i -v "$PWD:/docker" "$mod"
