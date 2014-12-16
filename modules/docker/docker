@@ -1,6 +1,13 @@
 #!/usr/bin/zsh
+_docker_deps(){
+	if isosx; then
+		return $(hash boot2docker 2>/dev/null)
+	else
+		return $(hash docker 2>/dev/null)
+	fi
+}
 
-docker() {
+_docker_deps && function docker() {
 	local verb="$1"
 	local mod="$2"
 
