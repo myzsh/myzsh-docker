@@ -122,10 +122,11 @@ docker() {
 		set +x
 	;;
 	up)
-		if isosx; then
-			boot2docker start
-			docker init
+		if ! isosx; then
+			echo "ERROR: Only available under OS X"
 		fi
+		boot2docker start
+		docker init
 	;;
 	upgrade)
 		if isosx; then
