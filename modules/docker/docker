@@ -29,7 +29,7 @@ docker() {
 		esac
 	;;
 	down)
-		boot2docker down
+		warnmaconly && boot2docker down
 	;;
 	dev)
 		if [ -z "$3" ]; then
@@ -55,7 +55,7 @@ docker() {
 		fi
 	;;
 	init)
-		if isosx; then
+		if warnmaconly; then
 			$(boot2docker shellinit 2>/dev/null | grep HOST)
 
 			if [ -z "$DOCKER_CERT_PATH" ]; then
@@ -122,14 +122,13 @@ docker() {
 		set +x
 	;;
 	up)
-		if ! isosx; then
-			echo "ERROR: Only available under OS X"
+		if warnmaconly; then
+			boot2docker start
+			docker init
 		fi
-		boot2docker start
-		docker init
 	;;
 	upgrade)
-		if isosx; then
+		if warnmaconly; then
 			after=""
 			[ "$(boot2docker status 2>&1)" = "running" ] && after="up"
 			$0 down
@@ -141,5 +140,14 @@ docker() {
 		command docker "$@"
 	;;
 	esac
+}
+
+warnmaconly(){
+	if ! isosx; then
+		echo "ERROR: Only available under OS X"
+		return 1
+	else
+		return 0
+	fi
 }
 # vim: filetype=zsh noexpandtab
