@@ -1,4 +1,6 @@
 #!/usr/bin/zsh
+
+#Test comment to remove later
 docker() {
 	local verb="$1"
 	local mod="$2"
