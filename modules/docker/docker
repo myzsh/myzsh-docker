@@ -17,7 +17,11 @@ docker() {
 			unset DOCKER_TLS_VERIFY
 		;;
 		images)
-			command docker rmi $(command docker images | awk '/<none>/ {print $3}') 2>/dev/null
+			if [ -z "$3" ]; then
+				command docker rmi $(command docker images | awk '/<none>/ {print $3}') 2>/dev/null
+			else
+				command docker rmi $(command docker images | awk '/'$3'/ {print $3}') 2>/dev/null
+			fi
 		;;
 		*)
 			$0 clean containers
