@@ -30,9 +30,9 @@ docker() {
 	;;
 	dev)
 		if [ -z "$3" ]; then
-			command docker run -t -i -v "$PWD:/work" "$mod"
+			command docker run -t -i -v "$PWD:/docker" "$mod"
 		else
-			command docker run -t -i -v "$3:/work" "$mod"
+			command docker run -t -i -v "$3:/docker" "$mod"
 		fi
 	;;
 	help)
