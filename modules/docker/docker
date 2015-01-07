@@ -32,11 +32,8 @@ docker() {
 		warnmaconly && boot2docker down
 	;;
 	dev)
-		if [ -z "$3" ]; then
-			command docker run -t -i -v "$PWD:/docker" "$mod"
-		else
-			command docker run -t -i -v "$3:/docker" "$mod"
-		fi
+		shift
+		command docker run -t -i -v "$PWD:/docker" "$@"
 	;;
         enter)
 		if [ -z "$3" ]; then
