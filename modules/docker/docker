@@ -38,6 +38,13 @@ docker() {
 			command docker run -t -i -v "$3:/docker" "$mod"
 		fi
 	;;
+        enter)
+		if [ -z "$3" ]; then
+			command docker exec -t -i "$mod" "/bin/bash"
+		else
+			command docker exec -t -i "$mod" "$3"
+		fi
+	;;
 	help)
 		shift
 		if [ -z "$1" ]; then
@@ -46,6 +53,7 @@ docker() {
     myzsh provided commands:\
     clean     Clean up images or containers, or both\
     dev       Run /bin/bash in an image with $PWD mapped in\
+    enter     Run interactive prompt with /bin/bash by default, or passed in command\
     init      Setup boot2docker\
     tail      Show only the last few lines from the log of a container\
     ip        Get the IP of a container\
