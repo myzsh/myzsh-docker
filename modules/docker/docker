@@ -52,7 +52,6 @@ docker() {
     dev       Run /bin/bash in an image with $PWD mapped in\
     enter     Run interactive prompt with /bin/bash by default, or passed in command\
     init      Setup boot2docker\
-    tail      Show only the last few lines from the log of a container\
     ip        Get the IP of a container\
     describe  Describe how a container was started\
     socket    Run a proxy socket on /tmp/proxysocket.sock\
@@ -67,22 +66,6 @@ docker() {
 			[ -z "$DOCKER_CERT_PATH" ] && $(boot2docker shellinit 2>/dev/null | grep CERT_PATH)
 			[ -z "$DOCKER_TLS_VERIFY" ] && $(boot2docker shellinit 2>/dev/null | grep TLS)
 		fi
-	;;
-	tail)
-		shift
-		container="$1"
-		shift
-		length=10
-		if [ -n "$1" ]; then
-			length="$1"
-			shift
-		fi
-		command docker logs -f "$container" 2>&1 \
-		| (
-			head -n $[ 	$(command docker logs "$container" 2>&1 \
-					| wc -l) - $length ] >/dev/null
-		cat
-		)
 	;;
 	ip)
 		shift
