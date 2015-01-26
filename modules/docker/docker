@@ -42,7 +42,7 @@ _docker_deps && function docker() {
 	;;
 	dev)
 		shift
-		command docker run -t -i -v "$PWD:/docker" "$@"
+		command docker run -t -i -v "$PWD:/docker" --workdir=/docker "$@"
 	;;
         enter)
 		if [ -z "$3" ]; then
