@@ -1,10 +1,12 @@
 #!/usr/bin/zsh
 _docker_deps(){
-	if isosx; then
-		return $(hash boot2docker 2>/dev/null)
-	else
-		return $(hash docker 2>/dev/null)
-	fi
+	app="docker"
+	isosx && app="boot2docker"
+
+	result=$(hash $app 2>/dev/null)
+	$result || myzsh error "Couldn't find ${app}"
+
+	return $result
 }
 
 _docker_deps && function docker() {
