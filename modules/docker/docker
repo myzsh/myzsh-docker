@@ -1,6 +1,15 @@
 #!/usr/bin/zsh
+_docker_deps(){
+	app="docker"
+	isosx && app="boot2docker"
 
-docker() {
+	result=$(hash $app 2>/dev/null)
+	$result || myzsh error "Couldn't find ${app}"
+
+	return $result
+}
+
+_docker_deps && function docker() {
 	local verb="$1"
 	local mod="$2"
 
