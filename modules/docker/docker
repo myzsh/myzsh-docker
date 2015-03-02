@@ -117,7 +117,7 @@ _docker_deps && function docker() {
 	up)
 		if warnmaconly; then
 			boot2docker start
-			docker init
+			$0 init
 		fi
 	;;
 	upgrade)
@@ -126,7 +126,7 @@ _docker_deps && function docker() {
 			[ "$(boot2docker status 2>&1)" = "running" ] && after="up"
 			$0 down
 			boot2docker upgrade
-			boot2docker $after 2>/dev/null
+			$0 $after 2>/dev/null
 		fi
 	;;
 	*)
