@@ -106,6 +106,9 @@ _docker_deps && function docker() {
  {{.}}
 {{end}}" "$container" | tr -d '\n' | sed -r 's/ -e (HOME|PATH)=[^ ]*//g'
 	;;
+	nuke)
+		$0 kill $(command docker ps -a -q)
+	;;
 	shove)
 		shift
 		size=$(command docker save "$1" | wc -c)
