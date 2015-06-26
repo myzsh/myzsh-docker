@@ -3,7 +3,7 @@ function _deps(){
 	app="docker"
 	isosx && app="boot2docker"
 
-	$(hash $app 2>/dev/null) || ( myzsh error "Couldn't find application ${app}" && return 1 )
+	$(hash $app 2>/dev/null) || $(myzsh error "Couldn't find application ${app}" && return 1)
 }
 
 function docker() {
