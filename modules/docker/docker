@@ -1,15 +1,12 @@
 #!/usr/bin/zsh
-_docker_deps(){
+function _deps(){
 	app="docker"
 	isosx && app="boot2docker"
 
-	result=$(hash $app 2>/dev/null)
-	$result || myzsh error "Couldn't find ${app}"
-
-	return $result
+	$(hash $app 2>/dev/null) || ( myzsh error "Couldn't find application ${app}" && return 1 )
 }
 
-_docker_deps && function docker() {
+function docker() {
 	local verb="$1"
 	local mod="$2"
 
@@ -44,7 +41,7 @@ _docker_deps && function docker() {
 		shift
 		command docker run -t -i -v "$PWD:/docker" --workdir=/docker "$@"
 	;;
-        enter)
+   enter)
 		if [ -z "$3" ]; then
 			command docker exec -t -i "$mod" "/bin/bash"
 		else
@@ -140,7 +137,7 @@ _docker_deps && function docker() {
 
 warnmaconly(){
 	if ! isosx; then
-		echo "ERROR: Only available under OS X"
+		myzsh error "Only available under OS X" && return 1
 		return 1
 	else
 		return 0
