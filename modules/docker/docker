@@ -161,4 +161,8 @@ warnmaconly(){
 		return 0
 	fi
 }
+
+docker images -f 'label=FUNCTION_NAME' -q | while read -r cid; do
+	alias $(docker inspect -f '{{.Config.Labels.FUNCTION_NAME}}' $cid)="docker run --rm -v \$PWD:\$PWD -w \$PWD -u \$UID:\$GID $cid"
+done
 # vim: filetype=zsh noexpandtab
