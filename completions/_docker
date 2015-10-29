@@ -180,7 +180,13 @@ __docker_commands () {
         local -a lines
         lines=(${(f)"$(_call_program commands docker 2>&1)"})
         _docker_subcommands=(${${${lines[$((${lines[(i)Commands:]} + 1)),${lines[(I)    *]}]}## #}/ ##/:})
-        _docker_subcommands=($_docker_subcommands 'help:Show help for a command')
+        _docker_subcommands=($_docker_subcommands \
+            'clean:Clean up containers or images, or both' \
+            'dev:Run an image with $PWD mapped in' \
+            'ip:Get the IP of a container' \
+            'help:Show help for a command' \
+            'nuke:Kills all containers' \
+            )
         _store_cache docker_subcommands _docker_subcommands
     fi
     _describe -t docker-commands "docker command" _docker_subcommands
@@ -226,6 +232,10 @@ __docker_subcommand () {
                     fi
                     ;;
             esac
+            ;;
+        (dev)
+            _arguments \
+                ':repository:__docker_repositories'
             ;;
         (diff|export)
             _arguments '*:containers:__docker_containers'
