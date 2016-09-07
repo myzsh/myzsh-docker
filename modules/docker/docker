@@ -14,7 +14,10 @@ function docker() {
 	clean)
 		case "$mod" in
 		containers)
-			command docker rm -v $(command docker ps -a -q -f status=exited) || return 0
+			num_containers=$(docker ps -a -q -f "status=exited" | wc -l)
+			if [ $num_containers -gt 0 ]; then
+				command docker rm -v $(command docker ps -a -q -f status=exited) || return 0
+			fi
 		;;
 		env)
 			unset DOCKER_HOST
@@ -23,7 +26,10 @@ function docker() {
 		;;
 		images)
 			if [ -z "$3" ]; then
-				command docker rmi $(command docker images -f "dangling=true" -q) || return 0
+				num_images=$(docker images -f "dangling=true" -q | wc -l)
+				if [ $num_images -gt 0 ]; then
+					command docker rmi $(command docker images -f "dangling=true" -q) || return 0
+				fi
 			else
 				command docker rmi $(command docker images | awk '/'$3'/ {print $3}') 2>/dev/null || return 0
 			fi
