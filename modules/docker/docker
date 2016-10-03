@@ -14,7 +14,7 @@ function docker() {
 	clean)
 		case "$mod" in
 		containers)
-			local exits=$(docker ps -a -q -f "status=exited")
+			local exits="$(docker ps -a -q -f 'status=exited')"
 			[ -n "$exits" ] && command docker rm -v "${(@f)exits}" || return 0
 		;;
 		env)
@@ -24,7 +24,7 @@ function docker() {
 		;;
 		images)
 			if [ -z "$3" ]; then
-				local danglers=$(docker images -f "dangling=true" -q)
+				local danglers="$(docker images -f 'dangling=true' -q)"
 				[ -n "$danglers" ] && command docker rmi "${(@f)danglers}" || return 0
 			else
 				command docker rmi $(command docker images | awk '/'$3'/ {print $3}') 2>/dev/null || return 0
