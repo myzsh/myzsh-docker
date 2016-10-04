@@ -119,7 +119,18 @@ function docker() {
 {{end}}" "$container" | tr -d '\n' | sed -r 's/ -e (HOME|PATH)=[^ ]*//g'
 	;;
 	nuke)
-		$0 kill $(command docker ps -a -q)
+		if [ -z "$mod" ]; then
+			local ids="$(command docker ps -a -q -f 'status=running')"
+			[ -n "$ids" ] && $0 kill "${(@f)ids}"
+			$0 clean
+		else
+			local id="$(command docker ps -a -q -f "name=$mod")"
+			if [ -n "$id" ]; then
+				$0 kill $id && $0 rm $id
+			else
+				myzsh error "Container $mod not found"
+			fi
+		fi
 	;;
 	shove)
 		shift
