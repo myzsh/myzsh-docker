@@ -41,7 +41,7 @@ function docker() {
 	;;
 	dev)
 		shift
-		command docker run -t -i -v "$PWD:/docker" --workdir=/docker "$@"
+		command docker run -t -i -v "$PWD:/docker" --workdir=/docker "${(z)@}"
 	;;
         enter)
 		if [ -z "$3" ]; then
