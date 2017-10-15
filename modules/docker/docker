@@ -11,31 +11,6 @@ function docker() {
 	local mod="$2"
 
 	case "$verb" in
-	clean)
-		case "$mod" in
-		containers)
-			local exits="$(docker ps -a -q -f 'status=exited')"
-			[ -n "$exits" ] && command docker rm -v "${(@f)exits}" || return 0
-		;;
-		env)
-			unset DOCKER_HOST
-			unset DOCKER_CERT_PATH
-			unset DOCKER_TLS_VERIFY
-		;;
-		images)
-			if [ -z "$3" ]; then
-				local danglers="$(docker images -f 'dangling=true' -q)"
-				[ -n "$danglers" ] && command docker rmi "${(@f)danglers}" || return 0
-			else
-				command docker rmi $(command docker images | awk '/'$3'/ {print $3}') 2>/dev/null || return 0
-			fi
-		;;
-		*)
-			$0 clean containers
-			$0 clean images
-		;;
-		esac
-	;;
 	down)
 		warnmaconly && docker-machine stop default
 	;;
@@ -62,12 +37,12 @@ function docker() {
 		command docker help 2>&1 | sed '/wait/a \
 \
     myzsh provided commands:\
-    clean     Clean up images or containers, or both\
     describe  Describe how a container was started\
     dev       Run /bin/bash in an image with $PWD mapped in\
     down      Stop boot2docker vm with docker-machine\
     enter     Run interactive prompt with /bin/bash by default, or passed in command\
     env       Setup boot2docker env variables\
+    host      Set proper variables for accessing a docker engine on a different host\
     init      Setup boot2docker with docker-machine\
     ip        Get the IP of a container\
     nuke      Kill all running containers\
@@ -76,6 +51,24 @@ function docker() {
     up        Start boot2docker vm with docker-machine\
     upgrade   Upgrade boot2docker vm to latest version' >&2
 		fi
+	;;
+	host)
+		shift
+		case "$1" in
+		"")
+			unset DOCKER_HOST
+			unset DOCKER_CERT_PATH
+			unset DOCKER_TLS_VERIFY
+		;;
+		localhost)
+			export DOCKER_CERT_PATH=
+			export DOCKER_HOST=tcp://127.0.0.1:2375
+			export DOCKER_TLS_VERIFY=
+		;;
+		*)
+			echo "Unknown docker host"
+		;;
+		esac
 	;;
 	init)
 		if warnmaconly; then
