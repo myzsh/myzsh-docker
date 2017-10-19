@@ -11,6 +11,9 @@ function docker() {
 	local mod="$2"
 
 	case "$verb" in
+	clean)
+		command docker system prune -f
+	;;
 	down)
 		warnmaconly && docker-machine stop default
 	;;
